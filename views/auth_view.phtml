@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Iniciar sesión</title>
+    </head>
+    <body>
+        <?php if (isset($error)): ?>
+            <div style="color: red; border: 1px solid red; padding: 10px;">
+                <?php echo $error; ?>
+            </div>
+        <?php endif; ?>
+        <h1>Iniciar sesión</h1>
+        <form action="/auth/login" method="POST">
+            <label>Registro</label>
+            <input id="registration" name="registration" required>
+            <label>Contraseña</label>
+            <input id="password" name="password" type="password" required>
+            <button>Iniciar sesión</button>
+        </form>
+    </body>
+</html>

@@ -1,0 +1,8 @@
+<div>
+   <?php if (isset($_SESSION["user_id"])): ?>
+      <a href="/auth/logout">
+         <button>Logout</button>
+      </a>
+      <a><?php echo $_SESSION["user_role"] ?></a><br/>
+   <?php endif; ?>
+</div>
