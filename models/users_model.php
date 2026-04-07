@@ -17,13 +17,12 @@ class users_model{
         if ($_SESSION["user_role"] !== "M") return;
         $query = $this->db->query(self::BASE_QUERY);
         while($rows= $query->fetch(PDO::FETCH_ASSOC)) {
-            $this->tickets[] = $rows;
+            $this->users[] = $rows;
         }
-        return $this->tickets;
+        return $this->users;
     }
 
     public function read_id($id) {
-        if ($_SESSION["user_role"] !== "M") return;
         $query = $this->db->query(self::BASE_QUERY . " and users.registration = $id");
         while($rows= $query->fetch(PDO::FETCH_ASSOC)) {
             $this->user = $rows[0];

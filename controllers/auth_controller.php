@@ -1,26 +1,38 @@
 <?php
+
 require_once("models/auth_model.php");
 $auth = new auth_model();
-if ($action == "login") {
-    if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
-        $registration = $_POST['registration'];
-        $password = $_POST['password'];
-        $user = $auth->getUserByRegistry($registration);
-        if ($user && password_verify($password, $user['passwordhash'])) {
-            $_SESSION['user_id'] = $user['registration'];
-            $_SESSION['user_role'] = $user['role'];
-            header("Location: /tickets");
+$error = null;
+
+switch ($action) {
+    default:
+        login($auth, $_POST);
+        break;
+    case "logout":
+        logout();
+        break;
+}
+
+function login($auth, $data) {
+    global $error;
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $user = $auth->authenticate($data);
+        if ($user) {
+            $_SESSION["user_id"] = $user["registration"];
+            $_SESSION["user_role"] = $user["role"];
+            header("Location: /");
             exit();
-        } else {
-            $error = "Invalid username or password.";
         }
+        $error = "Incorrect user or password";
     }
 }
-if ($action == "logout") {
+
+function logout() {
     $_SESSION = array();
     session_destroy();
     header("Location: /");
     exit();
 }
+
 require_once("views/auth_view.phtml");
 ?>
