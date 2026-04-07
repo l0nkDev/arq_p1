@@ -12,8 +12,8 @@
                         <th>#</th>
                         <th>Descripción</th>
                         <th>Dueño</th>
-                        <th>Estado</th>
                         <th>Encargado</th>
+                        <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -22,18 +22,28 @@
                             <td><?php echo $entry["id"]?></td>
                             <td><?php echo $entry["description"]?></td>
                             <td><?php echo $entry["s_name"] . " " . $entry["s_lastname"]?></td>
-                            <td><?php echo $entry["status"]?></td>
                             <td><?php echo $entry["a_name"] . " " . $entry["a_lastname"]?></td>
+                            <td><?php echo $entry["status"]?></td>
                             <td>
                                 <?php if ($_SESSION["user_id"] == $entry["student_id"]):?>
-                                    <a href="/tickets/delete/<?php echo $entry["id"] ?>">
-                                        <button>Eliminar</button>
-                                    </a>
-                                <?php endif ?>
-                                <?php if ($_SESSION["user_id"] == $entry["admin_id"]):?>
+                                    <?php if ($entry["status"] !== "RETURNED"): ?>
+                                        <?php if ($entry["status"] !== "CLOSED"): ?>
+                                            <a href="/tickets/delete/<?php echo $entry["id"] ?>">
+                                                <button>Eliminar</button>
+                                            </a>
+                                        <?php endif ?>
+                                    <?php else: ?>
                                     <form action="/tickets/update/<?php echo $entry["id"] ?>" method="POST">
-                                        <input id="description" name="description" value="<?php echo $entry["description"] ?>" hidden>
-                                        <select id="status" name="status">
+                                        <input name="status" value="CLOSED" hidden>
+                                        <input name="description" value="<?php echo $entry["description"] ?>" hidden>
+                                        <button>Confirmar</button>
+                                    </form>
+                                    <?php endif ?>
+                                <?php endif ?>
+                                <?php if ($_SESSION["user_id"] == $entry["admin_id"] && $entry["status"] !== "CLOSED"):?>
+                                    <form action="/tickets/update/<?php echo $entry["id"] ?>" method="POST">
+                                        <input name="description" value="<?php echo $entry["description"] ?>" hidden>
+                                        <select name="status">
                                             <option selected value="PENDING">Pendiente</option>
                                             <option value="SEARCHING">Buscando</option>
                                             <option value="FOUND">Encontrado</option>
@@ -57,6 +67,7 @@
                         <label>Descripcion</label>
                         <input name="description" minlength="1">
                         <input name="status" value="PENDING" hidden>
+                        <input name="location_id" value="3" hidden>
                         <button>Enviar</button>
                     </form>
                 </div>

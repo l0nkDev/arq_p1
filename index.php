@@ -23,7 +23,7 @@ if (!isset($_SESSION['user_id']) && ($controllerName !== 'auth')) {
    exit;
 }
 
-if (isset($_SESSION['user_id']) && ($controllerName == null || $controllerName == '' || ($controllerName == 'auth' && $action == 'login'))) {
+if (isset($_SESSION['user_id']) && ($controllerName == null || $controllerName == '' || ($controllerName == 'auth' && $action == 'login') || ($controllerName == 'users' && $_SESSION["user_role"] !== 'M'))) {
    $controllerName = 'tickets';
    header("Location: /tickets");
    exit;
@@ -37,6 +37,9 @@ switch ($controllerName) {
       break;
    case 'tickets':
       require_once('controllers/tickets_controller.php');
+      break;
+   case 'users':
+      require_once('controllers/users_controller.php');
       break;
    default:
       http_response_code(404);

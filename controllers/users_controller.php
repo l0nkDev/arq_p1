@@ -1,26 +1,25 @@
 <?php
+
 require_once("models/users_model.php");
 $users = new users_model();
-if ($action == "create") {
-    if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
-        $registration = $_POST['registration'];
-        $password = $_POST['password'];
-        $user = $auth->getUserByRegistry($registration);
-        if ($user && password_verify($password, $user['passwordhash'])) {
-            $_SESSION['user_id'] = $user['registration'];
-            $_SESSION['user_role'] = $user['type'];
-            header("Location: /tickets");
-            exit();
-        } else {
-            $error = "Invalid username or password.";
-        }
-    }
+$data = $users->read();
+
+switch ($action) {
+    case "create":
+        create($users, $_POST);
+        break;
+    default:
+        read($users, $data);
+        break;
 }
-if ($action == "logout") {
-    $_SESSION = array();
-    session_destroy();
-    header("Location: /");
-    exit();
+
+function create($users, $form) {
+    $users->create($form);
+    header('Location: /users');
+    exit;
 }
-require_once("views/auth_view.phtml");
+
+function read($users, $data) {
+    require_once("views/users_view.phtml");
+}
 ?>

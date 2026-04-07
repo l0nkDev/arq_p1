@@ -12,15 +12,17 @@ switch ($action) {
         read($tickets, $data);
         break;
     case "update":
-        update($tickets, $_POST, $id);
+        if (is_numeric($id)) update($tickets, $_POST, $id);
         break;
     case "delete":
-        if (is_numeric($id)) delete($tickets, $data, $id);
+        if (is_numeric($id)) delete($tickets, $id);
         break;
 }
 
 function create($tickets, $form) {
-    $tickets->create($form);
+    $form["admin_id"] = 123456789;
+    $form["location_id"] = 3;
+    $tickets->create($form, $_SESSION["user_id"]);
     header('Location: /tickets');
     exit;
 }
@@ -35,13 +37,8 @@ function update($tickets, $form, $id) {
     exit;
 }
 
-function delete($tickets, $data, $id) {
-    $foundrow = array_find($data, function($row) use ($id) {
-        return $row["id"] == $id;
-    });
-    if ($foundrow["student_id"] == $_SESSION["user_id"]) {
-        $tickets->delete($id);
-    }
+function delete($tickets, $id) {
+    $tickets->delete($id, $_SESSION['user_id']);
     header('Location: /tickets');
     exit;
 }

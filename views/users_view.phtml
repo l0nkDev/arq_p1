@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Tickets</title>
+    </head>
+    <body>
+        <div style="display: flex; flex-direction: row;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Registro</th>
+                        <th>Nombre</th>
+                        <th>Apellido(s)</th>
+                        <th>Telefono</th>
+                        <th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($data as $entry): ?>
+                        <tr>
+                            <td><?php echo $entry["registration"]?></td>
+                            <td><?php echo $entry["name"]?></td>
+                            <td><?php echo $entry["lastname"]?></td>
+                            <td><?php echo $entry["phone"]?></td>
+                            <td><?php echo $entry["role"]?></td>
+                        </tr>
+                    <?php endforeach?>
+                </tbody>
+            </table>
+            <?php if ($_SESSION["user_role"] == "M"):?>
+                <div>
+                    <h2>Registra un usuario</h2>
+                    <form action="/users/create" method="POST">
+                        <label>Registro</label>
+                        <input name="registration" type="number" minlength="9">
+                        <label>Contraseña</label>
+                        <input name="password" minlength="8">
+                        <label>Nombre</label>
+                        <input name="name" minlength="1">
+                        <label>Apellido(s)</label>
+                        <input name="lastname" minlength="1">
+                        <label>Telefono</label>
+                        <input name="phone" type="number" minlength="7">
+                        <select name="role">
+                            <option value="S" selected>Estudiante</option>
+                            <option value="A">Administrativo</option>
+                            <option value="M">Gerente</option>
+                        </select>
+                        <button>Enviar</button>
+                    </form>
+                </div>
+            <?php endif; ?>
+        </div>
+    </body>
+</html>

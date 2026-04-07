@@ -3,6 +3,11 @@
       <a href="/auth/logout">
          <button>Logout</button>
       </a>
-      <a><?php echo $_SESSION["user_role"] ?></a><br/>
+      <a><?php echo $_SESSION["user_role"] ?></a>
+      <a href="/tickets">Tickets</a>
+      <?php if ($_SESSION["user_role"] == "M"): ?>
+         <a href="/users">Users</a>
+      <?php endif ?>
+      <br/>
    <?php endif; ?>
 </div>
