@@ -16,8 +16,6 @@ class UserModel
 
     public function read()
     {
-        if ($_SESSION["user_role"] !== "M")
-            return;
         $query = $this->db->query(self::BASE_QUERY);
         while ($rows = $query->fetch(PDO::FETCH_ASSOC)) {
             $this->users[] = $rows;
@@ -49,8 +47,6 @@ class UserModel
 
     public function create($data)
     {
-        if ($_SESSION["user_role"] !== "M")
-            return;
         $passwordhash = password_hash($data["password"], PASSWORD_DEFAULT);
         $sql = "insert into users (registration, passwordhash, name, lastname, phone, role) values(:registration, :passwordhash, :name, :lastname, :phone, :role)";
         $stmt = $this->db->prepare($sql);
