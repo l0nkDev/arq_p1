@@ -1,13 +1,39 @@
-<div>
-   <?php if (isset($_SESSION["user_id"])): ?>
-      <a href="/auth/logout">
-         <button>Logout</button>
-      </a>
-      <a><?php echo $_SESSION["user_role"] ?></a>
-      <a href="/tickets">Tickets</a>
-      <?php if ($_SESSION["user_role"] == "M"): ?>
-         <a href="/users">Users</a>
-      <?php endif ?>
-      <br/>
-   <?php endif; ?>
-</div>
+<script src="/bootstrap.bundle.min.js"></script>
+<script src="/popper.min.js"></script>
+<style>
+   body {
+      background-color: #f3f4f6 !important;
+   }
+</style>
+<link href="/bootstrap.min.css" rel="stylesheet">
+<?php if (isset($_SESSION["user_id"])): ?>
+   <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+      <div class="container-fluid">
+         <a class="navbar-brand" href="#">Primer Parcial</a>
+         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+         </button>
+         <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+               <li class="nav-item">
+                  <a class="nav-link" href="/tickets">Tickets</a>
+               </li>
+
+               <?php if ($_SESSION["user_role"] == "M"): ?>
+                  <li class="nav-item">
+                     <a class="nav-link" href="/users">Users</a>
+                  </li>
+                  <li class="nav-item">
+                     <a class="nav-link" href="/locations">Locations</a>
+                  </li>
+
+               <?php endif ?>
+            </ul>
+            <a href="/auth/logout">
+               <button class="btn btn-outline-danger" type="submit">Logout</button>
+            </a>
+         </div>
+      </div>
+   </nav>
+<?php endif; ?>

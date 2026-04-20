@@ -1,6 +1,5 @@
 <?php 
 session_start();
-require_once("db/db.php");
 $fullUri = $_SERVER['REQUEST_URI'] ?? '';
 $requestUri = parse_url($fullUri, PHP_URL_PATH);
 $uriPath = trim($_SERVER['PATH_INFO'] ?? '', '/');
@@ -33,13 +32,24 @@ require_once("index.phtml");
 
 switch ($controllerName) {
    case 'auth':
-      require_once('controllers/auth_controller.php');
+      require_once('controllers/AuthController.php');
+      $auth = new AuthController();
+      $auth->handleRequest($action);
       break;
    case 'tickets':
-      require_once('controllers/tickets_controller.php');
+      require_once('controllers/TicketController.php');
+      $ticket = new TicketController();
+      $ticket->handleRequest($action, $id);
       break;
    case 'users':
-      require_once('controllers/users_controller.php');
+      require_once('controllers/UserController.php');
+      $user = new UserController();
+      $user->handleRequest($action);
+      break;
+   case 'locations':
+      require_once('controllers/LocationController.php');
+      $location = new LocationController();
+      $location->handleRequest($action, $id);
       break;
    default:
       http_response_code(404);

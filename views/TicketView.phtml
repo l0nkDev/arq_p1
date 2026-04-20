@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Gestión de Tickets</title>
+</head>
+<body>
+    <div class="w-100 h-100 d-flex flex-column align-items-center gap-4 p-4 bg-light">
+        <div class="card shadow-sm w-100" style="max-width: 1300px;">
+            <div class="card-body">
+                <div class="d-flex flex-row align-items-center justify-content-between mb-3">
+                    <h5 class="card-title mb-0">Gestión de Tickets</h5>
+
+                    <?php if ($_SESSION["user_role"] == "S"): ?>
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createTicketModal">
+                            ➕ Registrar Objeto
+                        </button>
+                    <?php endif; ?>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle text-center mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Foto</th>
+                                <th>Título</th>
+                                <th>Descripción</th>
+                                <th>Ubicación</th> <th>Dueño</th>
+                                <th>Encargado</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($tickets as $entry): ?>
+                                <tr>
+                                    <td class="fw-bold text-muted"><?php echo $entry["id"] ?></td>
+                                    <td>
+                                        <?php if ($entry["imageurl"]): ?>
+                                            <img src="<?php echo $entry["imageurl"] ?>" class="rounded" style="height: 40px; width: 40px; object-fit: cover; border: 1px solid #ddd;">
+                                        <?php else: ?>
+                                            <span class="text-muted small">Sin foto</span>
+                                        <?php endif ?>
+                                    </td>
+                                    <td class="fw-semibold"><?php echo htmlspecialchars($entry["title"]) ?></td>
+                                    <td class="text-start" style="max-width: 200px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="<?php echo htmlspecialchars($entry["description"]) ?>">
+                                        <?php echo htmlspecialchars($entry["description"]) ?>
+                                    </td>
+                                    
+                                    <td class="small text-nowrap">
+                                        <?php 
+                                            $locText = "ID Ref: " . $entry["location_id"]; // Valor por defecto
+                                            
+                                            // Buscamos el ID del ticket dentro del arreglo de Locations
+                                            if (!empty($locations) && is_array($locations)) {
+                                                foreach ($locations as $loc) {
+                                                    if ($loc["Location_id"] == $entry["location_id"]) {
+                                                        $locText = isset($loc["Precinct"]) ? $loc["Precinct"] : "Predio Desconocido";
+                                                        if (isset($loc["Module"])) $locText .= " - Mód. " . $loc["Module"];
+                                                        if (isset($loc["Room"])) $locText .= " - Aula " . $loc["Room"];
+                                                        break; // Terminamos el bucle al encontrarlo
+                                                    }
+                                                }
+                                            }
+                                            echo htmlspecialchars($locText);
+                                        ?>
+                                    </td>
+
+                                    <td><?php echo $entry["s_name"] . " " . $entry["s_lastname"] ?></td>
+                                    <td><?php echo $entry["a_name"] . " " . $entry["a_lastname"] ?></td>
+                                    <td>
+                                        <?php switch ($entry["status"]):
+                                            case "PENDING": ?>
+                                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                                <?php break;
+                                            case "SEARCHING": ?>
+                                                <span class="badge bg-info text-dark">Buscando</span>
+                                                <?php break;
+                                            case "FOUND": ?>
+                                                <span class="badge bg-success">Encontrado</span>
+                                                <?php break;
+                                            case "RETURNED": ?>
+                                                <span class="badge bg-primary">Devuelto</span>
+                                                <?php break;
+                                            case "LOST": ?>
+                                                <span class="badge bg-danger">Perdido</span>
+                                                <?php break;
+                                            case "CLOSED": ?>
+                                                <span class="badge bg-secondary">Cerrado</span>
+                                        <?php endswitch ?>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <?php if ($_SESSION["user_id"] == $entry["admin_id"] && $entry["status"] !== "CLOSED"): ?>
+                                                <form action="/tickets/update/<?php echo $entry["id"] ?>" method="POST" class="m-0">
+                                                    <input name="description" value="<?php echo htmlspecialchars($entry["description"]) ?>" hidden>
+                                                    <div class="input-group input-group-sm" style="min-width: 140px;">
+                                                        <select class="form-select" name="status">
+                                                            <option <?php echo ($entry["status"] == "PENDING") ? "selected" : "" ?> value="PENDING">Pendiente</option>
+                                                            <option <?php echo ($entry["status"] == "SEARCHING") ? "selected" : "" ?> value="SEARCHING">Buscando</option>
+                                                            <option <?php echo ($entry["status"] == "FOUND") ? "selected" : "" ?> value="FOUND">Encontrado</option>
+                                                            <option <?php echo ($entry["status"] == "RETURNED") ? "selected" : "" ?> value="RETURNED">Devuelto</option>
+                                                            <option <?php echo ($entry["status"] == "LOST") ? "selected" : "" ?> value="LOST">Perdido</option>
+                                                        </select>
+                                                        <button class="btn btn-secondary" type="submit" title="Guardar">💾</button>
+                                                    </div>
+                                                </form>
+                                            <?php endif ?>
+
+                                            <?php if ($_SESSION["user_id"] == $entry["student_id"]): ?>
+                                                <?php if ($entry["status"] !== "RETURNED" && $entry["status"] !== "CLOSED"): ?>
+                                                    <a href="/tickets/delete/<?php echo $entry["id"] ?>" class="btn btn-outline-danger btn-sm" title="Eliminar Ticket">🗑️</a>
+                                                <?php elseif ($entry["status"] === "RETURNED"): ?>
+                                                    <form action="/tickets/close/<?php echo $entry["id"] ?>" method="POST" class="m-0">
+                                                        <input name="status" value="CLOSED" hidden>
+                                                        <input name="description" value="<?php echo htmlspecialchars($entry["description"]) ?>" hidden>
+                                                        <button class="btn btn-success btn-sm" type="submit">✅ Confirmar</button>
+                                                    </form>
+                                                <?php endif ?>
+                                            <?php endif ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="createTicketModal" tabindex="-1" aria-labelledby="createTicketModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createTicketModalLabel">Registra un objeto perdido</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/tickets/create" method="POST" enctype="multipart/form-data">
+                        <div class="modal-body d-flex flex-column gap-3 text-start">
+                            <div>
+                                <label class="form-label fw-semibold">Título</label>
+                                <input name="title" class="form-control" required minlength="1" placeholder="Ej: Mochila negra">
+                            </div>
+                            <div>
+                                <label class="form-label fw-semibold">Descripción detallada</label>
+                                <textarea name="description" class="form-control" rows="3" required minlength="1" placeholder="Marca, contenido, dónde se perdió..."></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="form-label fw-semibold">Lugar de pérdida</label>
+                                <select name="location_id" class="form-select" required>
+                                    <option value="" disabled selected>Seleccione una ubicación...</option>
+                                    
+                                    <?php if (!empty($locations) && is_array($locations)): ?>
+                                        <?php foreach ($locations as $loc): ?>
+                                            <?php 
+                                                $locText = isset($loc["Precinct"]) ? $loc["Precinct"] : "Predio Desconocido";
+                                                if (isset($loc["Module"])) $locText .= " - Mód. " . $loc["Module"];
+                                                if (isset($loc["Room"])) $locText .= " - Aula " . $loc["Room"];
+                                            ?>
+                                            <option value="<?= $loc["Location_id"] ?>"><?= htmlspecialchars($locText) ?></option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                    
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="form-label fw-semibold">Foto del objeto (Opcional)</label>
+                                <input name="image" type="file" class="form-control" accept="image/*">
+                            </div>
+
+                            <input name="status" value="PENDING" hidden>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Enviar Ticket</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

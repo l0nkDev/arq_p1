@@ -1,0 +1,109 @@
+<head>
+    <meta charset="UTF-8" />
+    <title>Gestión de Usuarios</title>
+</head>
+<div class="w-100 h-100 d-flex flex-column align-items-center gap-4 p-4">
+    <div class="card text-center mb-3 w-75">
+        <div class="card-body">
+            <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+                <h5 class="card-title mb-0">Usuarios</h5>
+
+                <?php if ($_SESSION["user_role"] == "M"): ?>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                        ➕ Registrar Usuario
+                    </button>
+                <?php endif; ?>
+            </div>
+            
+            <div class="table-responsive mt-3">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Registro</th>
+                            <th>Nombre</th>
+                            <th>Apellido(s)</th>
+                            <th>Teléfono</th>
+                            <th>Rol</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($data as $entry): ?>
+                            <tr>
+                                <td><?php echo $entry["registration"]?></td>
+                                <td><?php echo $entry["name"]?></td>
+                                <td><?php echo $entry["lastname"]?></td>
+                                <td><?php echo $entry["phone"]?></td>
+                                <td>
+                                    <?php switch ($entry["role"]): 
+                                        case "S": ?>
+                                            <span class="badge bg-secondary">Estudiante</span>
+                                            <?php break;
+                                        case "A": ?>
+                                            <span class="badge bg-primary">Administrativo</span>
+                                            <?php break;
+                                        case "M": ?>
+                                            <span class="badge bg-dark">Gerente</span>
+                                            <?php break;
+                                        default: ?>
+                                            <span class="badge bg-light text-dark"><?php echo $entry["role"]?></span>
+                                    <?php endswitch ?>
+                                </td>
+                            </tr>
+                        <?php endforeach?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <?php if ($_SESSION["user_role"] == "M"): ?>
+        <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createUserModalLabel">Registrar un nuevo usuario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/users/create" method="POST">
+                        <div class="modal-body d-flex flex-column gap-3 text-start">
+                            <div>
+                                <label class="form-label">Registro</label>
+                                <input name="registration" type="number" class="form-control" required minlength="9">
+                            </div>
+                            <div>
+                                <label class="form-label">Contraseña</label>
+                                <input name="password" type="password" class="form-control" required minlength="8">
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label class="form-label">Nombre</label>
+                                    <input name="name" type="text" class="form-control" required minlength="1">
+                                </div>
+                                <div class="col">
+                                    <label class="form-label">Apellido(s)</label>
+                                    <input name="lastname" type="text" class="form-control" required minlength="1">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">Teléfono</label>
+                                <input name="phone" type="number" class="form-control" required minlength="7">
+                            </div>
+                            <div>
+                                <label class="form-label">Rol</label>
+                                <select name="role" class="form-select" required>
+                                    <option value="S" selected>Estudiante</option>
+                                    <option value="A">Administrativo</option>
+                                    <option value="M">Gerente</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Guardar Usuario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
