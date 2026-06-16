@@ -1,11 +1,9 @@
 <?php
     class TicketView {
-        public $tickets;
-        public $locations;
+        public $data;
 
-        public function render($tickets, $locations) {
-            $this->tickets = $tickets;
-            $this->locations = $locations;
+        public function render($data) {
+            $this->data = $data;
             include_once("views/TicketView.phtml");
         }
     }

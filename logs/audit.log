@@ -1,0 +1,7 @@
+[2026-06-16 15:32:13] ACTION: CREATE | DATA: {"title":"kmldfkms","description":"fldksmfldmskf","status":"5"}
+[2026-06-16 15:32:18] ACTION: DELETE | DATA: {"id":"4"}
+[2026-06-16 15:32:20] ACTION: DELETE | DATA: {"id":"2"}
+[2026-06-16 15:32:32] ACTION: CREATE | DATA: {"title":"dasdas","description":"sda","status":"5"}
+[2026-06-16 15:35:00] ACTION: DELETE | DATA: {"id":"5"}
+[2026-06-16 15:35:17] ACTION: CREATE | DATA: {"title":"dsadsa","description":"dsadas","status":"5","imageurl":"uploads\/tickets\/img_6a316d35321269.01141582.png"}
+[2026-06-16 15:36:02] ACTION: DELETE | DATA: {"id":"6"}

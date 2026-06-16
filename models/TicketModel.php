@@ -1,28 +1,38 @@
     <?php
 
     require_once("db/Connect.php");
+    require_once("models/patterns/Subject.php");
 
-    class TicketModel{
-        private const BASE_QUERY = "select 
-        tickets.*, 
-        s.name as s_name, 
-        s.lastname as s_lastname, 
-        a.name as a_name, 
-        a.lastname as a_lastname 
-        from tickets, users s, users a 
-        where 
-            student_id = s.registration and
-            admin_id = a.registration";
+    class TicketModel implements Subject {
+        private const string BASE_QUERY = "select * from ticket";
         private $db;
         private $tickets;
+        private $observers = [];
 
         public function __construct() {
-            $this->db = Connect::connection();
+            $this->db = Connect::getInstance()->getPDO();
             $this->tickets = [];
         }
 
+        public function attach(Observer $observer) {
+            $this->observers[] = $observer;
+        }
+
+        public function detach(Observer $observer) {
+            $key = array_search($observer, $this->observers, true);
+            if ($key !== false) {
+                unset($this->observers[$key]);
+            }
+        }
+
+        public function notify($action, $data) {
+            foreach ($this->observers as $observer) {
+                $observer->update($action, $data);
+            }
+        }
+
         public function read() {
-            $query = $this->db->query(self::BASE_QUERY . " order by tickets.id asc");
+            $query = $this->db->query(self::BASE_QUERY . " order by id asc");
             while($rows= $query->fetch(PDO::FETCH_ASSOC)) {
                 $this->tickets[] = $rows;
             }
@@ -30,49 +40,40 @@
         }
 
         public function readId($id) {
-            $sql = self::BASE_QUERY . " AND tickets.id = :id";
+            $sql = self::BASE_QUERY . " WHERE ticket.id = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':id' => $id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
-        public function create($form, $user_id) {
-            $sql = "insert into tickets (description, status, student_id, admin_id, location_id, title, imageurl) values(:description, :status, :student_id, :admin_id, :location_id, :title, :imageurl)";
+        public function create($form) {
+            $sql = "insert into ticket (description, status, title, imageurl) values(:description, :status, :title, :imageurl)";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
                 ':description' => $form['description'],
                 ':status' => $form['status'],
-                ':student_id' => $user_id,
-                ':admin_id' => $form['admin_id'],
-                ':location_id' => $form['location_id'],
                 ':title' => $form['title'],
                 ':imageurl' => $form['imageurl'],
             ]);
+            $this->notify("CREATE", $form);
         }
 
-        public function updateValidated($form, $id, $user_id) {
-            $sql = "update tickets set status = :status where id = :id and admin_id = :user_id";
+        public function update($form, $id) {
+            $sql = "update ticket set status = :status where id = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([
                 ':status' => $form['status'],
-                ':id' => $id,
-                ':user_id' => $user_id
+                ':id' => $id
             ]);
+            $form['id'] = $id;
+            $this->notify("UPDATE", $form);
         }
 
-        public function closeValidated($id, $user_id) {
-            $sql = "update tickets set status = 'CLOSED' where id = :id and status = 'RETURNED' and student_id = :student_id";
+        public function delete($id) {
+            $sql = "DELETE FROM ticket WHERE id = :id";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute([
-                ':id' => $id,
-                ':student_id' => $user_id,
-            ]);
-        }
-
-        public function deleteValidated($id, $user_id) {
-            $sql = "DELETE FROM tickets WHERE id = :id AND student_id = :user_id AND status != 'RETURNED'";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([':id' => $id, ':user_id' => $user_id]);
+            $stmt->execute([':id' => $id]);
+            $this->notify("DELETE", ['id' => $id]);
         }
     }
     ?>

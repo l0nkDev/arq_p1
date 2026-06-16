@@ -8,48 +8,33 @@ $controllerName = !empty($parts[0]) ? $parts[0] : 'auth';
 $action = !empty($parts[1]) ? $parts[1] : 'login';
 $id = $parts[2] ?? null;
 
-if ($uriPath == '') {
-    if (isset($_SESSION['user_id'])) {
-        header("Location: /tickets");
-    } else {
-        header("Location: /auth/login");
-    }
-    exit;
-}
 
-if (!isset($_SESSION['user_id']) && ($controllerName !== 'auth')) {
-   header("Location: /auth/login");
-   exit;
-}
-
-if (isset($_SESSION['user_id']) && ($controllerName == null || $controllerName == '' || ($controllerName == 'auth' && $action == 'login') || ($controllerName == 'users' && $_SESSION["user_role"] !== 'M'))) {
-   $controllerName = 'tickets';
+if ($controllerName == null || !in_array($controllerName, ['tickets', 'comments'])) {
    header("Location: /tickets");
    exit;
 }
 
 require_once("index.phtml");
+require_once("db/Connect.php");
+
+
+$instance1 = Connect::getInstance();
+$instance2 = Connect::getInstance();
+if ($instance1 === $instance2) {
+   error_log("El patrón singleton funciona correctamente!\n");
+}
+
 
 switch ($controllerName) {
-   case 'auth':
-      require_once('controllers/AuthController.php');
-      $auth = new AuthController();
-      $auth->handleRequest($action);
-      break;
    case 'tickets':
       require_once('controllers/TicketController.php');
       $ticket = new TicketController();
       $ticket->handleRequest($action, $id);
       break;
-   case 'users':
-      require_once('controllers/UserController.php');
-      $user = new UserController();
-      $user->handleRequest($action);
-      break;
-   case 'locations':
-      require_once('controllers/LocationController.php');
-      $location = new LocationController();
-      $location->handleRequest($action, $id);
+   case 'comments':
+      require_once('controllers/CommentController.php');
+      $comment = new CommentController();
+      $comment->handleRequest($action, $id);
       break;
    default:
       http_response_code(404);
