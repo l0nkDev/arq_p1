@@ -7,7 +7,7 @@ class TicketController {
 
     public function __construct() {
         $this->tickets = new TicketModel();
-        $this->tickets->attach(new TicketAuditObserver());
+        $this->tickets->attach(new TicketAuditObserver($this->tickets));
     }
 
     public function handleRequest($action, $id = null) {

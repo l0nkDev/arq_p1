@@ -3,32 +3,24 @@
     require_once("db/Connect.php");
     require_once("models/patterns/Subject.php");
 
-    class TicketModel implements Subject {
+    class TicketModel extends Subject {
         private const string BASE_QUERY = "select * from ticket";
         private $db;
         private $tickets;
-        private $observers = [];
+        private string $lastAction = '';
+        private array $lastData = [];
 
         public function __construct() {
             $this->db = Connect::getInstance()->getPDO();
             $this->tickets = [];
         }
 
-        public function attach(Observer $observer) {
-            $this->observers[] = $observer;
+        public function getLastAction(): string {
+            return $this->lastAction;
         }
 
-        public function detach(Observer $observer) {
-            $key = array_search($observer, $this->observers, true);
-            if ($key !== false) {
-                unset($this->observers[$key]);
-            }
-        }
-
-        public function notify($action, $data) {
-            foreach ($this->observers as $observer) {
-                $observer->update($action, $data);
-            }
+        public function getLastData(): array {
+            return $this->lastData;
         }
 
         public function read() {
@@ -55,7 +47,9 @@
                 ':title' => $form['title'],
                 ':imageurl' => $form['imageurl'],
             ]);
-            $this->notify("CREATE", $form);
+            $this->lastAction = "CREATE";
+            $this->lastData = $form;
+            $this->notify();
         }
 
         public function update($form, $id) {
@@ -66,14 +60,18 @@
                 ':id' => $id
             ]);
             $form['id'] = $id;
-            $this->notify("UPDATE", $form);
+            $this->lastAction = "UPDATE";
+            $this->lastData = $form;
+            $this->notify();
         }
 
         public function delete($id) {
             $sql = "DELETE FROM ticket WHERE id = :id";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':id' => $id]);
-            $this->notify("DELETE", ['id' => $id]);
+            $this->lastAction = "DELETE";
+            $this->lastData = ['id' => $id];
+            $this->notify();
         }
     }
     ?>
